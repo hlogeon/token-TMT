@@ -11,6 +11,16 @@ TMT token is a standard ERC20 token
 | Decimals       | 18                 |
 | Maximum supply | 2000000000         |
 | Mintable       | true               |
+| Burnable       | true               |
+
+
+### Token distribution
+
+| Purpose                                   | % of tokens |
+|-------------------------------------------|-------------|
+| Team                                      | 15%         |
+| Advisory board, early supporters, bounty  | 8%          |
+| Reserve fund                              | 37%         |
 
 
 ## TMT Pre ICO
@@ -31,6 +41,10 @@ TMT token is a standard ERC20 token
 | 2    | March 10 - March 17 | 125%         | 115%      | 105%         |
 | 3    | March 18 - March 25 | 115%         | 105%      | 95%          |
 | 4-6  | March 26 - April 12 | 105%         | 95%       | 85%          |
+
+### Other terms and conditions
+
+There is no Hard Cap during presale stage. If the soft cap is not reached, refunds will be available after the lock period. Users supposed to call `refund()` method of Pre ICO smart-contract.
 
 
 ## How to setup development environment and run tests?
