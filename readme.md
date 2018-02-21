@@ -15,6 +15,23 @@ TMT token is a standard ERC20 token
 
 ## TMT Pre ICO
 
+| Start date       | MARCH 2, 2018                |
+|------------------|------------------------------|
+| End date         | APRIL 12, 2018               |
+| Payment method   | ETH                          |
+| Soft Cap         | 428550 TMT (150 ETH)         |
+| Token price      | 0.000350018 ETH              |
+| Minimum purchase | 142.849796296 TMT (0.05 ETH) |
+
+### Bonuses and discounts
+
+| Week | Date                | above 50 ETH | 10-50 ETH | below 10 ETH |
+|------|---------------------|--------------|-----------|--------------|
+| 1    | March 2 - March 9   | 150%         | 125%      | 115%         |
+| 2    | March 10 - March 17 | 125%         | 115%      | 105%         |
+| 3    | March 18 - March 25 | 115%         | 105%      | 95%          |
+| 4-6  | March 26 - April 12 | 105%         | 95%       | 85%          |
+
 
 ## How to setup development environment and run tests?
 
