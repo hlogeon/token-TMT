@@ -23,6 +23,10 @@ TMT token is a standard ERC20 token
 | Reserve fund                              | 37%         |
 
 
+### Other token info
+All tokens should be frozen by default with ability to unfreeze the tokens after some event(KYC passed) or date.
+
+
 ## TMT Pre ICO
 
 | Start date       | MARCH 2, 2018                |
