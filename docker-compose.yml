@@ -7,14 +7,7 @@ services:
       dockerfile: rpc.Dockerfile
     ports:
       - 8545
-
-  oracle:
-    build:
-      context: ./
-      dockerfile: oracle.Dockerfile
-    depends_on:
-      - rpc
-
+      
   workspace:
     build:
       context: ./
