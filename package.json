@@ -9,6 +9,6 @@
     "chai-as-promised": "^7.1.1",
     "ethereumjs-testrpc": "^6.0.3",
     "sol-merger": "^0.1.0",
-    "zeppelin-solidity": "^1.2.0"
+    "zeppelin-solidity": "^1.7.0"
   }
 }

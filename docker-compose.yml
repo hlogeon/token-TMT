@@ -7,7 +7,7 @@ services:
       dockerfile: rpc.Dockerfile
     ports:
       - 8545
-      
+
   workspace:
     build:
       context: ./
@@ -15,5 +15,3 @@ services:
     tty: true
     volumes:
       - ./:/usr/src/workspace
-    depends_on:
-      - oracle
