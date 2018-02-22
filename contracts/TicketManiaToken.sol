@@ -50,7 +50,7 @@ contract TicketManiaToken is Burnable, Ownable {
    * @dev Constructor that gives msg.sender all of existing tokens.
    */
   function TicketManiaToken() {
-    totalSupply = INITIAL_SUPPLY;
+    totalSupply_ = INITIAL_SUPPLY;
     balances[msg.sender] = INITIAL_SUPPLY;
   }
 
