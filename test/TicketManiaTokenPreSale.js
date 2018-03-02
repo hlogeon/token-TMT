@@ -11,6 +11,8 @@ const limit = 250; //in USD
 const beneficiary = web3.eth.accounts[0];
 const ethUsdPrice = 250; //in USD
 
+web3.eth.sendTransaction({from: web3.eth.accounts[0], to: web3.eth.accounts[1], value: web3.toWei(5, 'ether')})
+
 function advanceToBlock(number) {
   if (web3.eth.blockNumber > number) {
     throw Error(`block number ${number} is in the past (current is ${web3.eth.blockNumber})`)
@@ -29,7 +31,7 @@ contract('TicketManiaTokenPresale', function (accounts) {
     this.token = await TicketManiaToken.new();
     const totalTokens = 2800; //NOT in wei, converted by contract
 
-    this.crowdsale = await TicketManiaTokenPreSale.new(hardCap, softCap, this.token.address, beneficiary, totalTokens, ethUsdPrice, limit, this.startBlock, this.endBlock);
+    this.crowdsale = await TicketManiaTokenPreSale.new(hardCap, softCap, this.token.address, beneficiary, totalTokens, ethUsdPrice, web3.eth.blockNumber, web3.eth.blockNumber + 50, web3.eth.blockNumber + 100, this.startBlock, this.endBlock);
     this.token.setTransferAgent(this.token.address, true);
     this.token.setTransferAgent(this.crowdsale.address, true);
     this.token.setTransferAgent(accounts[0], true);
@@ -99,10 +101,10 @@ contract('TicketManiaTokenPresale', function (accounts) {
     await this.crowdsale.sendTransaction({value: 1 * 10 ** 18, from: accounts[2]});
 
     const balance = await this.token.balanceOf(accounts[2]);
-    assert.equal(balance.valueOf(), 1000 * 10 ** 18);
+    assert.equal(balance.valueOf(), '2.05e+21');
 
     const crowdsaleBalance = await this.token.balanceOf(this.crowdsale.address);
-    assert.equal(crowdsaleBalance.valueOf(), 4000 * 10 ** 18);
+    assert.equal(crowdsaleBalance.valueOf(), '2.95e+21');
 
     const collected = await this.crowdsale.collected();
     assert.equal(collected.valueOf(), 1 * 10 ** 18);
@@ -111,7 +113,7 @@ contract('TicketManiaTokenPresale', function (accounts) {
     assert.equal(investorCount, 1);
 
     const tokensSold = await this.crowdsale.tokensSold();
-    assert.equal(tokensSold.valueOf(), 1000 * 10 ** 18);
+    assert.equal(tokensSold.valueOf(), '2.05e+21');
   });
 
   it('should not allow purchase when pre sale is halted', async function () {
@@ -128,28 +130,6 @@ contract('TicketManiaTokenPresale', function (accounts) {
   it('should not allow to send less than 0.1 ETH', async function () {
     try {
       await this.crowdsale.sendTransaction({value: 0.0999 * 10 ** 18, from: accounts[2]});
-    } catch (error) {
-      return assertJump(error);
-    }
-    assert.fail('should have thrown before');
-  });
-
-  it('should not allow to exceed purchase limit with 1 purchase', async function () {
-    const amount = ((limit / ethUsdPrice) + 1) * 10 ** 18;
-
-    try {
-      await this.crowdsale.sendTransaction({value: amount, from: accounts[2]});
-    } catch (error) {
-      return assertJump(error);
-    }
-    assert.fail('should have thrown before');
-  });
-
-  it('should not allow to exceed purchase limit with 2 purchases', async function () {
-    await this.crowdsale.sendTransaction({value: 0.9 * 10 ** 18, from: accounts[2]});
-
-    try {
-      await this.crowdsale.sendTransaction({value: 0.11 * 10 ** 18, from: accounts[2]});
     } catch (error) {
       return assertJump(error);
     }
@@ -214,23 +194,21 @@ contract('TicketManiaTokenPresale', function (accounts) {
   });
 
   it('should withdraw - send all not distributed tokens and collected ETH to beneficiary', async function () {
-    await this.crowdsale.sendTransaction({value: 1 * 10 ** 18, from: accounts[1]});
-    await this.crowdsale.sendTransaction({value: 1 * 10 ** 18, from: accounts[2]});
+    await this.crowdsale.sendTransaction({value: 2.2 * 10 ** 18, from: accounts[1]});
 
-    const oldBenBalanceEth = web3.eth.getBalance(beneficiary);
-    const oldBenBalanceTmt = await this.token.balanceOf(beneficiary).valueOf();
+    const oldBenBalanceEth = (await web3.eth.getBalance(beneficiary)).valueOf();
+    const oldBenBalanceTmt = (await this.token.balanceOf(beneficiary)).valueOf();
 
     await this.crowdsale.withdraw();
 
-    const newBenBalanceEth = web3.eth.getBalance(beneficiary);
-    const newBenBalanceTmt = await this.token.balanceOf(beneficiary).valueOf();
-    const preSaleContractBalanceTmt = await this.token.balanceOf(this.crowdsale.address).valueOf();
-    const preSaleContractBalanceEth = web3.eth.getBalance(this.crowdsale.address);
+    const newBenBalanceEth = await web3.eth.getBalance(beneficiary);
+    const newBenBalanceTmt = await this.token.balanceOf(beneficiary);
+    const preSaleContractBalanceTmt = await this.token.balanceOf(this.crowdsale.address);
+    const preSaleContractBalanceEth = await web3.eth.getBalance(this.crowdsale.address);
 
-    assert.equal(newBenBalanceEth > oldBenBalanceEth, true);
-    assert.equal(newBenBalanceTmt > oldBenBalanceTmt, true);
-    assert.equal(preSaleContractBalanceTmt, 0);
-    assert.equal(preSaleContractBalanceEth, 0);
+    assert.isAbove(newBenBalanceEth.valueOf(), oldBenBalanceEth);
+    assert.equal(preSaleContractBalanceTmt.valueOf(), 0);
+    assert.equal(preSaleContractBalanceEth.valueOf(), 0);
   });
 
   it('should not allow purchase if pre sale is ended', async function () {

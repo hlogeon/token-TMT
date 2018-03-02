@@ -36,8 +36,6 @@ contract TicketManiaTokenPreSale is Haltable {
 
   uint public bonus3BlockEnd;
 
-  uint public bonus4BlockEnd;
-
   uint public startBlock;
 
   uint public endBlock;
@@ -74,7 +72,6 @@ contract TicketManiaTokenPreSale is Haltable {
     uint _bonus1BlockEnd,
     uint _bonus2BlockEnd,
     uint _bonus3BlockEnd,
-    uint _bonus4BlockEnd,
 
     uint _startBlock,
     uint _endBlock
@@ -89,7 +86,6 @@ contract TicketManiaTokenPreSale is Haltable {
     bonus1BlockEnd = _bonus1BlockEnd;
     bonus2BlockEnd = _bonus2BlockEnd;
     bonus3BlockEnd = _bonus3BlockEnd;
-    bonus4BlockEnd = _bonus4BlockEnd;
 
     startBlock = _startBlock;
     endBlock = _endBlock;
@@ -118,7 +114,7 @@ contract TicketManiaTokenPreSale is Haltable {
     Refunded(msg.sender, refund);
   }
 
-  function withdraw() external onlyOwner {
+  function withdraw() public onlyOwner {
     require(softCapReached);
     beneficiary.transfer(collected);
     token.transfer(beneficiary, token.balanceOf(this));
@@ -150,39 +146,39 @@ contract TicketManiaTokenPreSale is Haltable {
   }
 
   function calculateBonus(uint tokens) internal constant returns (uint bonus) {
-      uint bonus = 0;
+      uint _bonus = 0;
       if (msg.value <= 10 ether) {
         if (block.number > startBlock && block.number <= bonus1BlockEnd) {
-          bonus = tokens.div(100).mul(115);
+          _bonus = tokens.div(100).mul(115);
         } else if (block.number > bonus1BlockEnd && block.number <= bonus2BlockEnd) {
-          bonus = tokens.div(100).mul(105);
+          _bonus = tokens.div(100).mul(105);
         } else if (block.number > bonus2BlockEnd && block.number <= bonus3BlockEnd) {
-          bonus = tokens.div(100).mul(95);
+          _bonus = tokens.div(100).mul(95);
         } else {
-          bonus = tokens.div(100).mul(85);
+          _bonus = tokens.div(100).mul(85);
         }
       } else if (msg.value > 10 ether && msg.value <= 50 ether) {
         if (block.number > startBlock && block.number <= bonus1BlockEnd) {
-          bonus = tokens.div(100).mul(125);
+          _bonus = tokens.div(100).mul(125);
         } else if (block.number > bonus1BlockEnd && block.number <= bonus2BlockEnd) {
-          bonus = tokens.div(100).mul(115);
+          _bonus = tokens.div(100).mul(115);
         } else if (block.number > bonus2BlockEnd && block.number <= bonus3BlockEnd) {
-          bonus = tokens.div(100).mul(105);
+          _bonus = tokens.div(100).mul(105);
         } else {
-          bonus = tokens.div(100).mul(95);
+          _bonus = tokens.div(100).mul(95);
         }
       } else {
         if (block.number > startBlock && block.number <= bonus1BlockEnd) {
-          bonus = tokens.div(100).mul(150);
+          _bonus = tokens.div(100).mul(150);
         } else if (block.number > bonus1BlockEnd && block.number <= bonus2BlockEnd) {
-          bonus = tokens.div(100).mul(125);
+          _bonus = tokens.div(100).mul(125);
         } else if (block.number > bonus2BlockEnd && block.number <= bonus3BlockEnd) {
-          bonus = tokens.div(100).mul(115);
+          _bonus = tokens.div(100).mul(115);
         } else {
-          bonus = tokens.div(100).mul(105);
+          _bonus = tokens.div(100).mul(105);
         }
-        return bonus;
       }
+      return _bonus;
   }
 
 
