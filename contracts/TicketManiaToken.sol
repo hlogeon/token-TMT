@@ -1,19 +1,20 @@
 pragma solidity ^0.4.11;
 
-import "./Burnable.sol";
 import "zeppelin-solidity/contracts/ownership/Ownable.sol";
+import "zeppelin-solidity/contracts/token/ERC20/MintableToken.sol";
+
 
 /**
  * @title TicketManiaToken
  *
  * @dev Burnable Ownable ERC20 token
  */
-contract TicketManiaToken is Burnable, Ownable {
+contract TicketManiaToken is MintableToken {
 
   string public constant name = "Ticket Mania Token";
   string public constant symbol = "TMT";
   uint8 public constant decimals = 18;
-  uint public constant INITIAL_SUPPLY = 35000000 * 1 ether;
+  uint public constant INITIAL_SUPPLY = 2000000000 * 1 ether;
 
   /* The finalizer contract that allows unlift the transfer limits on this token */
   address public releaseAgent;
@@ -80,20 +81,11 @@ contract TicketManiaToken is Burnable, Ownable {
   }
 
   function transfer(address _to, uint _value) canTransfer(msg.sender) returns (bool success) {
-    // Call Burnable.transfer()
     return super.transfer(_to, _value);
   }
 
   function transferFrom(address _from, address _to, uint _value) canTransfer(_from) returns (bool success) {
-    // Call Burnable.transferForm()
     return super.transferFrom(_from, _to, _value);
   }
 
-  function burn(uint _value) onlyOwner returns (bool success) {
-    return super.burn(_value);
-  }
-
-  function burnFrom(address _from, uint _value) onlyOwner returns (bool success) {
-    return super.burnFrom(_from, _value);
-  }
 }

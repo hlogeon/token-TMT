@@ -3,14 +3,15 @@ const assertJump = function(error) {
   assert.isAbove(error.message.search('VM Exception while processing transaction: revert'), -1, 'Invalid opcode error must be returned');
 };
 
+const initSupply = 2000000000 * 10 ** 18;
 contract('TicketManiaToken', function(accounts) {
-  it("should put 35000000 TMT to supply and in the first account", async function () {
+  it("should put 2000000000 TMT to supply and in the first account", async function () {
     const instance = await TicketManiaToken.new();
     const balance = await instance.balanceOf(accounts[0]);
     const supply = await instance.totalSupply();
 
-    assert.equal(balance.valueOf(), 35000000 * 10 ** 18, "First account (owner) balance must be 35000000");
-    assert.equal(supply.valueOf(), 35000000 * 10 ** 18, "Supply must be 35000000");
+    assert.equal(balance.valueOf(), 2000000000 * 10 ** 18, "First account (owner) balance must be 2000000000");
+    assert.equal(supply.valueOf(), 2000000000 * 10 ** 18, "Supply must be 2000000000");
   });
 
   it("should not allow to set releaseAgent by not owner", async function () {
@@ -121,42 +122,42 @@ contract('TicketManiaToken', function(accounts) {
     let token = await TicketManiaToken.new();
     await token.setReleaseAgent(accounts[0]);
     await token.release();
-
-    await token.transfer(accounts[1], 100 * 10 ** 18);
+    const sendingAmount = 100 * 10 ** 18;
+    await token.transfer(accounts[1], sendingAmount);
 
     const balance0 = await token.balanceOf(accounts[0]);
-    assert.equal(balance0.valueOf(), 34999900 * 10 ** 18);
+    assert.equal(balance0.valueOf(), initSupply - sendingAmount);
 
     const balance1 = await token.balanceOf(accounts[1]);
-    assert.equal(balance1.valueOf(), 100 * 10 ** 18);
+    assert.equal(balance1.valueOf(), sendingAmount);
   });
 
   it("should allow transfer when token is released - fractional value", async function() {
     let token = await TicketManiaToken.new();
     await token.setReleaseAgent(accounts[0]);
     await token.release();
-
-    await token.transfer(accounts[1], 0.0001 * 10 ** 18);
+    const sendingAmount = 0.0001 * 10 ** 18;
+    await token.transfer(accounts[1], sendingAmount);
 
     const balance0 = await token.balanceOf(accounts[0]);
-    assert.equal(balance0.valueOf(), 34999999.9999 * 10 ** 18);
+    assert.equal(balance0.valueOf(), initSupply - sendingAmount);
 
     const balance1 = await token.balanceOf(accounts[1]);
-    assert.equal(balance1.valueOf(), 0.0001 * 10 ** 18);
+    assert.equal(balance1.valueOf(), sendingAmount);
   });
 
   it("should allow transfer when token is not released but sender is added to transferAgents", async function() {
     let token = await TicketManiaToken.new();
 
     await token.setTransferAgent(accounts[0], true);
-
-    await token.transfer(accounts[1], 100 * 10 ** 18);
+    const sendingAmount = 100 * 10 ** 18;
+    await token.transfer(accounts[1], sendingAmount);
 
     const balance0 = await token.balanceOf(accounts[0]);
-    assert.equal(balance0.valueOf(), 34999900 * 10 ** 18);
+    assert.equal(balance0.valueOf(), initSupply - sendingAmount);
 
     const balance1 = await token.balanceOf(accounts[1]);
-    assert.equal(balance1.valueOf(), 100 * 10 ** 18);
+    assert.equal(balance1.valueOf(), sendingAmount);
   });
 
   it("should not allow transfer to 0x0", async function() {
@@ -202,15 +203,16 @@ contract('TicketManiaToken', function(accounts) {
     let token = await TicketManiaToken.new();
     await token.setReleaseAgent(accounts[0]);
     await token.release();
+    const sendingAmount = 100 * 10 ** 18;
 
-    await token.approve(accounts[1], 100 * 10 ** 18);
-    await token.transferFrom(accounts[0], accounts[2], 100 * 10 ** 18, {from: accounts[1]});
+    await token.approve(accounts[1], sendingAmount);
+    await token.transferFrom(accounts[0], accounts[2], sendingAmount, {from: accounts[1]});
 
     const balance0 = await token.balanceOf(accounts[0]);
-    assert.equal(balance0.valueOf(), 34999900 * 10 ** 18);
+    assert.equal(balance0.valueOf(), initSupply - sendingAmount);
 
     const balance1 = await token.balanceOf(accounts[2]);
-    assert.equal(balance1.valueOf(), 100 * 10 ** 18);
+    assert.equal(balance1.valueOf(), sendingAmount);
 
     const balance2 = await token.balanceOf(accounts[1]);
     assert.equal(balance2.valueOf(), 0);
@@ -219,102 +221,17 @@ contract('TicketManiaToken', function(accounts) {
   it("should allow transferFrom for transferAgent when token is not released", async function() {
     let token = await TicketManiaToken.new();
     await token.setTransferAgent(accounts[0], true);
-
-    await token.approve(accounts[1], 100 * 10 ** 18);
-    await token.transferFrom(accounts[0], accounts[2], 100 * 10 ** 18, {from: accounts[1]});
+    const sendingAmount = 100 * 10 ** 18;
+    await token.approve(accounts[1], sendingAmount);
+    await token.transferFrom(accounts[0], accounts[2], sendingAmount, {from: accounts[1]});
 
     const balance0 = await token.balanceOf(accounts[0]);
-    assert.equal(balance0.valueOf(), 34999900 * 10 ** 18);
+    assert.equal(balance0.valueOf(), initSupply - sendingAmount);
 
     const balance1 = await token.balanceOf(accounts[2]);
-    assert.equal(balance1.valueOf(), 100 * 10 ** 18);
+    assert.equal(balance1.valueOf(), sendingAmount);
 
     const balance2 = await token.balanceOf(accounts[1]);
     assert.equal(balance2.valueOf(), 0);
-  });
-
-  it("should allow to burn by owner", async function() {
-    let token = await TicketManiaToken.new();
-    await token.burn(1000000 * 10 ** 18);
-
-    const balance = await token.balanceOf(accounts[0]).valueOf();
-    assert.equal(balance, 34000000 * 10 ** 18);
-
-    const supply = await token.totalSupply().valueOf();
-    assert.equal(supply, 34000000 * 10 ** 18);
-  });
-
-  it("should not allow to burn by not owner", async function() {
-    let token = await TicketManiaToken.new();
-    await token.setTransferAgent(accounts[0], true);
-    await token.transfer(accounts[1], 1000000 * 10 ** 18);
-
-    try {
-      await token.burn(1000000 * 10 ** 18, {from: accounts[1]});
-    } catch (error) {
-      return assertJump(error);
-    }
-    assert.fail('should have thrown before');
-  });
-
-  it("should not allow to burn more than balance", async function() {
-    let token = await TicketManiaToken.new();
-
-    try {
-      await token.burn(35000001 * 10 ** 18);
-    } catch (error) {
-      return assertJump(error);
-    }
-    assert.fail('should have thrown before');
-  });
-
-  it("should allow to burn from by owner", async function() {
-    let token = await TicketManiaToken.new();
-    await token.setTransferAgent(accounts[0], true);
-    await token.transfer(accounts[1], 1000000 * 10 ** 18);
-    await token.approve(accounts[0], 500000 * 10 ** 18, {from: accounts[1]});
-    await token.burnFrom(accounts[1], 500000 * 10 ** 18);
-
-    const balance = await token.balanceOf(accounts[1]).valueOf();
-    assert.equal(balance, 500000 * 10 ** 18);
-
-    const supply = await token.totalSupply().valueOf();
-    assert.equal(supply, 34500000 * 10 ** 18);
-
-    //should not allow to burn more
-    try {
-      await token.burnFrom(accounts[1], 1);
-    } catch (error) {
-      return assertJump(error);
-    }
-    assert.fail('should have thrown before');
-  });
-
-  it("should not allow to burn from by not owner", async function() {
-    let token = await TicketManiaToken.new();
-    await token.setTransferAgent(accounts[0], true);
-    await token.transfer(accounts[1], 1000000 * 10 ** 18);
-    await token.approve(accounts[2], 500000 * 10 ** 18, {from: accounts[1]});
-
-    try {
-      await token.burnFrom(accounts[1], 500000 * 10 ** 18, {from: accounts[2]});
-    } catch (error) {
-      return assertJump(error);
-    }
-    assert.fail('should have thrown before');
-  });
-
-  it("should not allow to burn from more than balance", async function() {
-    let token = await TicketManiaToken.new();
-    await token.setTransferAgent(accounts[0], true);
-    await token.transfer(accounts[1], 500000 * 10 ** 18);
-    await token.approve(accounts[0], 1000000 * 10 ** 18, {from: accounts[1]});
-
-    try {
-      await token.burnFrom(accounts[1], 500001 * 10 ** 18);
-    } catch (error) {
-      return assertJump(error);
-    }
-    assert.fail('should have thrown before');
   });
 });
