@@ -22,8 +22,6 @@ contract TicketManiaTokenPreSale is Haltable {
 
   uint public price;
 
-  uint public purchaseLimit;
-
   uint public collected = 0;
 
   uint public tokensSold = 0;
@@ -31,6 +29,14 @@ contract TicketManiaTokenPreSale is Haltable {
   uint public investorCount = 0;
 
   uint public weiRefunded = 0;
+
+  uint public bonus1BlockEnd;
+
+  uint public bonus2BlockEnd;
+
+  uint public bonus3BlockEnd;
+
+  uint public bonus4BlockEnd;
 
   uint public startBlock;
 
@@ -65,7 +71,10 @@ contract TicketManiaTokenPreSale is Haltable {
     address _beneficiary,
     uint _totalTokens,
     uint _priceETH,
-    uint _purchaseLimitUSD,
+    uint _bonus1BlockEnd,
+    uint _bonus2BlockEnd,
+    uint _bonus3BlockEnd,
+    uint _bonus4BlockEnd,
 
     uint _startBlock,
     uint _endBlock
@@ -74,9 +83,13 @@ contract TicketManiaTokenPreSale is Haltable {
     softCap = _softCapUSD.mul(1 ether).div(_priceETH);
     price = _totalTokens.mul(1 ether).div(hardCap);
 
-    purchaseLimit = _purchaseLimitUSD.mul(1 ether).div(_priceETH).mul(price);
     token = TicketManiaToken(_token);
     beneficiary = _beneficiary;
+
+    bonus1BlockEnd = _bonus1BlockEnd;
+    bonus2BlockEnd = _bonus2BlockEnd;
+    bonus3BlockEnd = _bonus3BlockEnd;
+    bonus4BlockEnd = _bonus4BlockEnd;
 
     startBlock = _startBlock;
     endBlock = _endBlock;
@@ -122,16 +135,55 @@ contract TicketManiaTokenPreSale is Haltable {
     }
 
     uint tokens = msg.value.mul(price);
-    require(token.balanceOf(msg.sender).add(tokens) <= purchaseLimit);
+    uint bonus = calculateBonus(tokens);
+    uint totalTokens = tokens + bonus;
 
     if (token.balanceOf(msg.sender) == 0) investorCount++;
 
     collected = collected.add(msg.value);
 
-    token.transfer(msg.sender, tokens);
+    token.transfer(msg.sender, totalTokens);
 
-    tokensSold = tokensSold.add(tokens);
+    tokensSold = tokensSold.add(totalTokens);
 
-    NewContribution(_owner, tokens, msg.value);
+    NewContribution(_owner, totalTokens, msg.value);
   }
+
+  function calculateBonus(uint tokens) internal constant returns (uint bonus) {
+      uint bonus = 0;
+      if (msg.value <= 10 ether) {
+        if (block.number > startBlock && block.number <= bonus1BlockEnd) {
+          bonus = tokens.div(100).mul(115);
+        } else if (block.number > bonus1BlockEnd && block.number <= bonus2BlockEnd) {
+          bonus = tokens.div(100).mul(105);
+        } else if (block.number > bonus2BlockEnd && block.number <= bonus3BlockEnd) {
+          bonus = tokens.div(100).mul(95);
+        } else {
+          bonus = tokens.div(100).mul(85);
+        }
+      } else if (msg.value > 10 ether && msg.value <= 50 ether) {
+        if (block.number > startBlock && block.number <= bonus1BlockEnd) {
+          bonus = tokens.div(100).mul(125);
+        } else if (block.number > bonus1BlockEnd && block.number <= bonus2BlockEnd) {
+          bonus = tokens.div(100).mul(115);
+        } else if (block.number > bonus2BlockEnd && block.number <= bonus3BlockEnd) {
+          bonus = tokens.div(100).mul(105);
+        } else {
+          bonus = tokens.div(100).mul(95);
+        }
+      } else {
+        if (block.number > startBlock && block.number <= bonus1BlockEnd) {
+          bonus = tokens.div(100).mul(150);
+        } else if (block.number > bonus1BlockEnd && block.number <= bonus2BlockEnd) {
+          bonus = tokens.div(100).mul(125);
+        } else if (block.number > bonus2BlockEnd && block.number <= bonus3BlockEnd) {
+          bonus = tokens.div(100).mul(115);
+        } else {
+          bonus = tokens.div(100).mul(105);
+        }
+        return bonus;
+      }
+  }
+
+
 }
