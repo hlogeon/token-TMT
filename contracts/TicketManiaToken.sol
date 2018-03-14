@@ -11,7 +11,7 @@ import "zeppelin-solidity/contracts/token/ERC20/MintableToken.sol";
  */
 contract TicketManiaToken is MintableToken {
 
-  string public constant name = "Ticketmania Token";
+  string public constant name = "TicketMania Token";
   string public constant symbol = "TMT";
   uint8 public constant decimals = 18;
   uint public constant INITIAL_SUPPLY = 2000000000 * 1 ether;
