@@ -13,8 +13,8 @@ module.exports = function(deployer) {
     const totalTokens = 1400000; //NOT in wei, converted by contract
     const limit = 50000; //in USD
     const beneficiary = web3.eth.accounts[0];
-    const startBlock = web3.eth.blockNumber;
-    const endBlock = web3.eth.blockNumber + 100;
-    deployer.deploy(TicketManiaTokenPreSale, hardCap, softCap, token, beneficiary, totalTokens, 255, limit, startBlock, endBlock);
+    const startTimestamp = web3.eth.blockNumber;
+    const endTimestamp = web3.eth.blockNumber + 100;
+    deployer.deploy(TicketManiaTokenPreSale, hardCap, softCap, token, beneficiary, totalTokens, 255, limit, startTimestamp, endTimestamp);
   });
 };

@@ -13,25 +13,25 @@ const ethUsdPrice = 250; //in USD
 
 web3.eth.sendTransaction({from: web3.eth.accounts[0], to: web3.eth.accounts[1], value: web3.toWei(5, 'ether')})
 
-function advanceToBlock(number) {
-  if (web3.eth.blockNumber > number) {
+function advanceToTimestamp(number) {
+  if (Math.floor(Date.now() / 1000) > number) {
     throw Error(`block number ${number} is in the past (current is ${web3.eth.blockNumber})`)
   }
 
-  while (web3.eth.blockNumber < number) {
+  while (Math.floor(Date.now() / 1000) < number) {
     web3.eth.sendTransaction({value: 1, from: web3.eth.accounts[8], to: web3.eth.accounts[7]});
   }
 }
 
 contract('TicketManiaTokenPresale', function (accounts) {
   beforeEach(async function () {
-    this.startBlock = web3.eth.blockNumber;
-    this.endBlock = web3.eth.blockNumber + 15;
+    this.startTimestamp = Math.floor(Date.now() / 1000);
+    this.endTimestamp = Math.floor(Date.now() / 1000) + 1000;
 
     this.token = await TicketManiaToken.new();
     const totalTokens = 2800; //NOT in wei, converted by contract
 
-    this.crowdsale = await TicketManiaTokenPreSale.new(hardCap, softCap, this.token.address, beneficiary, totalTokens, ethUsdPrice, web3.eth.blockNumber, web3.eth.blockNumber + 50, web3.eth.blockNumber + 100, this.startBlock, this.endBlock);
+    this.crowdsale = await TicketManiaTokenPreSale.new(hardCap, softCap, this.token.address, beneficiary, totalTokens, ethUsdPrice, this.startTimestamp, this.startTimestamp + 120, this.startTimestamp + 360, this.startTimestamp, this.endTimestamp);
     this.token.setTransferAgent(this.token.address, true);
     this.token.setTransferAgent(this.crowdsale.address, true);
     this.token.setTransferAgent(accounts[0], true);
@@ -212,7 +212,7 @@ contract('TicketManiaTokenPresale', function (accounts) {
   });
 
   it('should not allow purchase if pre sale is ended', async function () {
-    advanceToBlock(this.endBlock);
+    advanceToTimestamp(this.endTimestamp);
 
     try {
       await this.crowdsale.sendTransaction({value: 0.1 * 10 ** 18, from: accounts[2]});
@@ -237,7 +237,7 @@ contract('TicketManiaTokenPresale', function (accounts) {
     await this.crowdsale.sendTransaction({value: 1 * 10 ** 18, from: accounts[1]});
     await this.crowdsale.sendTransaction({value: 1 * 10 ** 18, from: accounts[3]});
 
-    advanceToBlock(this.endBlock);
+    advanceToTimestamp(this.endTimestamp);
 
     try {
       await this.crowdsale.refund({from: accounts[3]});
@@ -250,7 +250,7 @@ contract('TicketManiaTokenPresale', function (accounts) {
   it('should not allow refund if pre sale is halted', async function () {
     await this.crowdsale.sendTransaction({value: 1 * 10 ** 18, from: accounts[1]});
 
-    advanceToBlock(this.endBlock);
+    advanceToTimestamp(this.endTimestamp);
 
     await this.crowdsale.halt();
 
@@ -265,7 +265,7 @@ contract('TicketManiaTokenPresale', function (accounts) {
   it('should refund if cap is not reached and pre sale is ended', async function () {
     await this.crowdsale.sendTransaction({value: 0.1 * 10 ** 18, from: accounts[2]});
 
-    advanceToBlock(this.endBlock);
+    advanceToTimestamp(this.endTimestamp);
 
     const balanceBefore = web3.eth.getBalance(accounts[2]);
     await this.crowdsale.refund({from: accounts[2]});

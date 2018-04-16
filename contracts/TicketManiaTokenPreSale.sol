@@ -30,15 +30,15 @@ contract TicketManiaTokenPreSale is Haltable {
 
   uint public weiRefunded = 0;
 
-  uint public bonus1BlockEnd;
+  uint public bonus1End;
 
-  uint public bonus2BlockEnd;
+  uint public bonus2End;
 
-  uint public bonus3BlockEnd;
+  uint public bonus3End;
 
-  uint public startBlock;
+  uint public startTimestamp;
 
-  uint public endBlock;
+  uint public endTimestamp;
 
   bool public softCapReached = false;
 
@@ -53,12 +53,12 @@ contract TicketManiaTokenPreSale is Haltable {
   event Refunded(address indexed holder, uint amount);
 
   modifier preSaleActive() {
-    require(block.number >= startBlock && block.number < endBlock);
+    require(block.timestamp >= startTimestamp && block.timestamp < endTimestamp);
     _;
   }
 
   modifier preSaleEnded() {
-    require(block.number >= endBlock);
+    require(block.timestamp >= endTimestamp);
     _;
   }
 
@@ -69,12 +69,12 @@ contract TicketManiaTokenPreSale is Haltable {
     address _beneficiary,
     uint _totalTokens,
     uint _priceETH,
-    uint _bonus1BlockEnd,
-    uint _bonus2BlockEnd,
-    uint _bonus3BlockEnd,
+    uint _bonus1End,
+    uint _bonus2End,
+    uint _bonus3End,
 
-    uint _startBlock,
-    uint _endBlock
+    uint _start,
+    uint _end
   ) {
     hardCap = _hardCapUSD.mul(1 ether).div(_priceETH);
     softCap = _softCapUSD.mul(1 ether).div(_priceETH);
@@ -83,12 +83,12 @@ contract TicketManiaTokenPreSale is Haltable {
     token = TicketManiaToken(_token);
     beneficiary = _beneficiary;
 
-    bonus1BlockEnd = _bonus1BlockEnd;
-    bonus2BlockEnd = _bonus2BlockEnd;
-    bonus3BlockEnd = _bonus3BlockEnd;
+    bonus1End = _bonus1End;
+    bonus2End = _bonus2End;
+    bonus3End = _bonus3End;
 
-    startBlock = _startBlock;
-    endBlock = _endBlock;
+    startTimestamp = _start;
+    endTimestamp = _end;
   }
 
   function() payable {
@@ -148,31 +148,31 @@ contract TicketManiaTokenPreSale is Haltable {
   function calculateBonus(uint tokens) internal constant returns (uint bonus) {
       uint _bonus = 0;
       if (msg.value <= 10 ether) {
-        if (block.number > startBlock && block.number <= bonus1BlockEnd) {
+        if (block.timestamp > startTimestamp && block.timestamp <= bonus1End) {
           _bonus = tokens.div(100).mul(115);
-        } else if (block.number > bonus1BlockEnd && block.number <= bonus2BlockEnd) {
+        } else if (block.timestamp > bonus1End && block.timestamp <= bonus2End) {
           _bonus = tokens.div(100).mul(105);
-        } else if (block.number > bonus2BlockEnd && block.number <= bonus3BlockEnd) {
+        } else if (block.timestamp > bonus2End && block.timestamp <= bonus3End) {
           _bonus = tokens.div(100).mul(95);
         } else {
           _bonus = tokens.div(100).mul(85);
         }
       } else if (msg.value > 10 ether && msg.value <= 50 ether) {
-        if (block.number > startBlock && block.number <= bonus1BlockEnd) {
+        if (block.timestamp > startTimestamp && block.timestamp <= bonus1End) {
           _bonus = tokens.div(100).mul(125);
-        } else if (block.number > bonus1BlockEnd && block.number <= bonus2BlockEnd) {
+        } else if (block.timestamp > bonus1End && block.timestamp <= bonus2End) {
           _bonus = tokens.div(100).mul(115);
-        } else if (block.number > bonus2BlockEnd && block.number <= bonus3BlockEnd) {
+        } else if (block.timestamp > bonus2End && block.timestamp <= bonus3End) {
           _bonus = tokens.div(100).mul(105);
         } else {
           _bonus = tokens.div(100).mul(95);
         }
       } else {
-        if (block.number > startBlock && block.number <= bonus1BlockEnd) {
+        if (block.timestamp > startTimestamp && block.timestamp <= bonus1End) {
           _bonus = tokens.div(100).mul(150);
-        } else if (block.number > bonus1BlockEnd && block.number <= bonus2BlockEnd) {
+        } else if (block.timestamp > bonus1End && block.timestamp <= bonus2End) {
           _bonus = tokens.div(100).mul(125);
-        } else if (block.number > bonus2BlockEnd && block.number <= bonus3BlockEnd) {
+        } else if (block.timestamp > bonus2End && block.timestamp <= bonus3End) {
           _bonus = tokens.div(100).mul(115);
         } else {
           _bonus = tokens.div(100).mul(105);

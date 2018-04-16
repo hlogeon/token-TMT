@@ -146,6 +146,20 @@ contract('TicketManiaToken', function(accounts) {
     assert.equal(balance1.valueOf(), sendingAmount);
   });
 
+  it("should not allow transfer when token is released and adddress is in frozen adddresses mapping", async function() {
+    let token = await TicketManiaToken.new();
+    await token.setReleaseAgent(accounts[0]);
+    await token.release();
+    await token.setFrozenTransfer(accounts[0], true);
+    const sendingAmount = 0.0001 * 10 ** 18;
+    try {
+      await token.transfer(accounts[1], sendingAmount);
+    } catch (error) {
+      return assertJump(error);
+    }
+    assert.fail('should have thrown before');
+  });
+
   it("should allow transfer when token is not released but sender is added to transferAgents", async function() {
     let token = await TicketManiaToken.new();
 

@@ -25,12 +25,15 @@ contract TicketManiaToken is MintableToken {
   /** Map of agents that are allowed to transfer tokens regardless of the lock down period. These are crowdsale contracts and possible the team multisig itself. */
   mapping (address => bool) public transferAgents;
 
+  mapping (address => bool) public frozenTransfer;
+
   /**
    * Limit token transfer until the crowdsale is over.
    *
    */
   modifier canTransfer(address _sender) {
     require(released || transferAgents[_sender]);
+    require(frozenTransfer[_sender] != true);
     _;
   }
 
@@ -78,6 +81,11 @@ contract TicketManiaToken is MintableToken {
   function setTransferAgent(address addr, bool state) onlyOwner inReleaseState(false) public {
     require(addr != 0x0);
     transferAgents[addr] = state;
+  }
+
+  function setFrozenTransfer(address addr, bool state) onlyOwner {
+    require(addr != 0x0);
+    frozenTransfer[addr] = state;
   }
 
   function transfer(address _to, uint _value) canTransfer(msg.sender) returns (bool success) {
